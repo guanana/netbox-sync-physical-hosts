@@ -4,12 +4,13 @@ import requests
 
 
 class NetBoxHandler:
-    def __init__(self, url, token, tls_verify, tag, cleanup_allowed):
+    def __init__(self, url, token, tls_verify, tag, cleanup_allowed, scanned_hosts):
         self.url = url
         self.token = token
         self.tls_verify = not tls_verify
         self.tag = tag
         self.cleanup_allowed = cleanup_allowed
+        self.scanned_hosts = scanned_hosts
         self.nb_con = self.connect()
         self.nb_ver = self.get_version()
 

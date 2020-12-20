@@ -21,12 +21,13 @@ logging.basicConfig(level=conf.l)
 if __name__ == '__main__':
 
     scanner = Nmap(conf.networks, conf.os_detection)
+    hosts = scanner.run()
     nb = NetBoxHandler(
         conf.nb_url,
         conf.nb_token,
         conf.nb_ignore_tls_errors,
         conf.tag,
-        conf.clenaup
+        conf.clenaup,
+        hosts
     )
-    scanner.run()
     exit(0)

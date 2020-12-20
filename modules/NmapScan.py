@@ -1,6 +1,7 @@
 import logging
 import nmap3
-
+from mac_vendor_lookup import MacLookup
+from getmac import get_mac_address
 
 class Nmap(object):
 
@@ -8,35 +9,70 @@ class Nmap(object):
         self.unknown = unknown
         self.networks = networks.split(',')
         self.hosts = {}
-        self.os_detection = os_detection
+        self.os_detection = True
+        self.mac_search = MacLookup()
         self.scan_results = self.scan()
 
     def scan(self):
+
+        def update_mac(ip):
+            """
+            Update Mac info
+            :param ip: IP address (ie: 192.168.1.1)
+            :return: True if MAC is found, False otherwise
+            """
+            mac = get_mac_address(ip=ip, network_request=True)
+            if mac is None:
+                return False
+            else:
+                scan_results[ip]["macaddress"] = mac
+                return True
+
+        def update_vendor(ip):
+            """
+            Update MAC vendor if Mac is found
+            :param ip: IP address (ie: 192.168.1.1)
+            :return: None
+            """
+            try:
+                vendor_fetch = self.mac_search.lookup(scan_results[ip]["macaddress"])
+                scan_results[ip]["vendor"] = vendor_fetch
+            except KeyError:
+                pass
+
+        def sanitaise_dict():
+            """
+            Remove unused dictionary entries
+            :return: None
+            """
+            scan_results[host].pop("state")
+            scan_results[host].pop("ports")
+            scan_results[host].pop("osmatch")
+            if scan_results[host]["hostname"]:
+                scan_results[host]["dns_name"] = scan_results[host]["hostname"][0]["name"]
+                scan_results[host].pop("hostname")
+            else:
+                scan_results[host].pop("hostname")
+            if not scan_results[host]["macaddress"]:
+                scan_results[host]["description"] = self.unknown
+                scan_results[host].pop("macaddress")
+
         nmap = nmap3.NmapHostDiscovery()  # instantiate nmap object
         logging.info(f"Start NMAP scan for {self.networks}")
         scan_results = {}
+        logging.debug("Updating MAC table")
+        self.mac_search.update_vendors()
         for item in self.networks:
-            if not self.os_detection:
-                temp_scan_result = nmap.nmap_no_portscan(item.replace('\n', ''), args="-R --system-dns")
-            else:
-                if nmap.as_root:
-                    temp_scan_result = nmap.nmap_os_detection(item.replace('\n', ''), args="-R --system-dns")
-                else:
-                    logging.critical("If you enable OS detection you must be root")
-                    exit(1)
+            temp_scan_result = nmap.nmap_no_portscan(item.replace('\n', ''), args="-R --system-dns")
             scan_results = {**scan_results, **temp_scan_result}
             scan_results.pop("stats")
             scan_results.pop("runtime")
+        for host, v in scan_results.items():
+            sanitaise_dict()
+            if update_mac(host):
+                update_vendor(ip=host)
+
         return scan_results
 
     def run(self):
-        for k,v in self.scan_results.items():
-            try:
-                self.hosts.update({k:{
-                    "dns_name": v['hostname'][0]['name']
-                }})
-            except (IndexError, KeyError):
-                 self.hosts.update({k:{
-                    "description": self.unknown
-                 }})
-        print(self.hosts)
+        return self.scan_results
