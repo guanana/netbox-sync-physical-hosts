@@ -5,11 +5,11 @@ from getmac import get_mac_address
 
 class Nmap(object):
 
-    def __init__(self, networks, os_detection, unknown="unknown"):
+    def __init__(self, networks, get_mac, unknown="unknown"):
         self.unknown = unknown
         self.networks = networks.split(',')
         self.hosts = {}
-        self.os_detection = True
+        self.get_mac = get_mac
         self.mac_search = MacLookup()
         self.scan_results = self.scan()
 
@@ -34,6 +34,8 @@ class Nmap(object):
             :param ip: IP address (ie: 192.168.1.1)
             :return: None
             """
+            logging.debug("Updating MAC table")
+            self.mac_search.update_vendors()
             try:
                 vendor_fetch = self.mac_search.lookup(scan_results[ip]["macaddress"])
                 scan_results[ip]["vendor"] = vendor_fetch
@@ -60,17 +62,16 @@ class Nmap(object):
         nmap = nmap3.NmapHostDiscovery()  # instantiate nmap object
         logging.info(f"Start NMAP scan for {self.networks}")
         scan_results = {}
-        logging.debug("Updating MAC table")
-        self.mac_search.update_vendors()
         for item in self.networks:
             temp_scan_result = nmap.nmap_no_portscan(item.replace('\n', ''), args="-R --system-dns")
             scan_results = {**scan_results, **temp_scan_result}
             scan_results.pop("stats")
             scan_results.pop("runtime")
         for host, v in scan_results.items():
+            if self.get_mac:
+                if update_mac(host):
+                    update_vendor(ip=host)
             sanitaise_dict()
-            if update_mac(host):
-                update_vendor(ip=host)
 
         return scan_results
 

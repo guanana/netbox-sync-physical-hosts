@@ -30,3 +30,8 @@ class NetBoxHandler:
 
     def run(self):
         logging.info(self.nb_ver)
+
+    def get_host_by_ip(self, ip):
+        nb_ip = self.nb_con.ipam.ip_addresses.get(address=ip)
+        if nb_ip and nb_ip.assigned_object:
+            return nb_ip.assigned_object.device
