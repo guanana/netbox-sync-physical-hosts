@@ -30,4 +30,5 @@ if __name__ == '__main__':
         conf.clenaup,
         hosts
     )
+    nb.run()
     exit(0)

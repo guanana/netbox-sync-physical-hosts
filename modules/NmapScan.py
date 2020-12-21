@@ -67,6 +67,8 @@ class Nmap(object):
             scan_results = {**scan_results, **temp_scan_result}
             scan_results.pop("stats")
             scan_results.pop("runtime")
+            for h, v in scan_results.items():
+                scan_results[h]["subnet"] = item
         for host, v in scan_results.items():
             if self.get_mac:
                 if update_mac(host):
