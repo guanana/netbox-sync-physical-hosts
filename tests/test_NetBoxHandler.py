@@ -24,13 +24,13 @@ class NetboxHandlerCase(unittest.TestCase):
         # Call the function, which will send a request to the server.
         con = Api("test")
         mock_api.return_value = con
-        response = NetBoxHandler("http://localhost:8000", "0123456789abcdef0123456789abcdef01234567",
+        response = NetBoxHandler("http://localhost:8000", "1234",
                                  False, "test", False, ({1: "test"},{2:"test"}))
         response.nb_ver = "2.9"
         # Assert that the request-response cycle completed successfully.
         self.assertIsInstance(response, NetBoxHandler)
         self.assertEqual(response.nb_ver, "2.9")
-        self.assertEqual(response.token, "0123456789abcdef0123456789abcdef01234567")
+        self.assertEqual(response.token, "1234")
 
     def test_get_hosts_by_api(self):
         # Test return object
