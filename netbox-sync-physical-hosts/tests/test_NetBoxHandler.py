@@ -1,8 +1,7 @@
 import unittest
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch
 
 import pynetbox
-import requests
 from pynetbox.core.api import Api
 
 from netboxhandler.NetBoxHandler import NetBoxHandler, get_host_by_ip
