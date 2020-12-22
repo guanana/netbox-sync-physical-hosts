@@ -4,3 +4,4 @@ ConfigArgParse~=1.2.3
 python3-nmap
 mac-vendor-lookup
 getmac~=0.8.2
+chardet==3.0.4
