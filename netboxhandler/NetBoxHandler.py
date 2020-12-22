@@ -29,7 +29,7 @@ class NetBoxHandler:
         self.all_interfaces = self.nb_con.dcim.interfaces.all()
         self.all_devices = self.nb_con.dcim.devices.all()
         self.all_sites = self.nb_con.dcim.sites.all()
-        self.TYPE_MAP= {
+        self.TYPE_MAP = {
             "ip-addresses": self.all_ips,
             "interfaces": self.all_interfaces,
             "devices": self.all_devices,
@@ -53,7 +53,7 @@ class NetBoxHandler:
             exit(1)
 
     def pre_reqs(self):
-        if float(self.get_version()) >= 2.9:
+        if float(self.nb_ver) >= 2.9:
             self.tag = self.create_tag()
 
     def create_tag(self):

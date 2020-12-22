@@ -1,4 +1,4 @@
-from modules.NetBoxHandler import NetBoxHandler
+from netboxhandler.NetBoxHandler import NetBoxHandler
 from modules.NmapScan import Nmap
 import configargparse
 import logging
