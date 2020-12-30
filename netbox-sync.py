@@ -1,5 +1,5 @@
-from netboxhandler.NetBoxHandler import NetBoxHandler
-from modules.NmapScan import Nmap
+from NetBoxHandler import NetBoxHandler
+from NmapScan import Nmap
 import configargparse
 import logging
 
@@ -22,13 +22,6 @@ if __name__ == '__main__':
 
     scanner = Nmap(conf.networks, conf.get_mac)
     hosts = scanner.run()
-    nb = NetBoxHandler(
-        conf.nb_url,
-        conf.nb_token,
-        conf.nb_ignore_tls_errors,
-        conf.tag,
-        conf.clenaup,
-        hosts
-    )
+    nb = NetBoxHandler(conf.nb_url, conf.nb_token, conf.nb_ignore_tls_errors, conf.tag, conf.clenaup, hosts )
     nb.run()
     exit(0)

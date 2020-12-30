@@ -3,8 +3,7 @@ from unittest.mock import patch
 
 import pynetbox
 from pynetbox.core.api import Api
-
-from netboxhandler.NetBoxHandler import NetBoxHandler, get_host_by_ip
+from NetBoxHandler import NetBoxHandler, get_host_by_ip
 
 #NB Model classes
 class name:
