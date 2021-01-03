@@ -14,13 +14,12 @@ def get_host_by_ip(nb_ip):
 
 
 class NetBoxHandler:
-    def __init__(self, url, token, tls_verify, tag, cleanup_allowed, scanned_hosts):
+    def __init__(self, url, token, tls_verify, tag, cleanup_allowed):
         self.url = url
         self.token = token
         self.tls_verify = not tls_verify
         self.tag = tag
         self.cleanup_allowed = cleanup_allowed
-        self.scanned_hosts = scanned_hosts
         self.nb_con = self.connect()
         self.nb_ver = self.get_version()
         #Netbox objects
@@ -93,9 +92,9 @@ class NetBoxHandler:
         else:
             return nb_ip, False
 
-    def run(self):
+    def run(self, scanned_hosts):
         logging.debug(f"Netbox version: {self.nb_ver}")
-        for ip, attr in self.scanned_hosts.items():
+        for ip, attr in scanned_hosts.items():
             nb_ip, single = self.lookup_ip_address(ip)
             if not single:
                 logging.warning(f"Found {ip.address} duplicated")
