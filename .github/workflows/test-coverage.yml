@@ -20,6 +20,9 @@ jobs:
         pip install pytest
         pip install pytest-cov
         pip install -r requirements.txt
+    - name: Add path
+      run: |
+        echo "$HOME/Netbox-sync-physical-hosts/netbox-sync-physical-hosts" >> $PYTHONPATH
     - name: Generate coverage report
       run: |
         pytest --cov=./ --cov-report=xml

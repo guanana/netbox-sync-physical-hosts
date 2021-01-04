@@ -1,3 +1,4 @@
+import os
 import unittest
 from distutils.version import StrictVersion
 from unittest.mock import patch, MagicMock
