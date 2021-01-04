@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Add path
       run: |
-        echo "$HOME/Netbox-sync-physical-hosts/netbox-sync-physical-hosts" >> $PYTHONPATH
+        echo "::set-env name=PYTHONPATH::home/runner/work/netbox-sync-physical-hosts"
     - name: Generate coverage report
       run: |
         pytest --cov=./ --cov-report=xml
