@@ -23,9 +23,10 @@ jobs:
     - name: Add path
       run: |
         echo "PYTHONPATH=$( pwd -P)/../:$PYTHONPATH" >> $GITHUB_ENV
-        echo "PYTHONPATH=/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts:/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts/netbox-sync-physical-hosts/modules:/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts/netbox-sync-physical-hosts/netboxhandler:$PYTHONPATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=/home/runner/work/netbox-sync-physical-hosts/netbox-sync-physical-hosts:/home/runner/work/netbox-sync-physical-hosts/netbox-sync-physical-hosts/netbox-sync-physical-hosts/modules:/home/runner/work/netbox-sync-physical-hosts/netbox-sync-physical-hosts/netbox-sync-physical-hosts/netboxhandler:$PYTHONPATH" >> $GITHUB_ENV
     - name: Generate coverage report
       run: |
+        echo $PYTHONPATH
         pytest --cov=./ --cov-report=xml
     - uses: codecov/codecov-action@v1
       with:
