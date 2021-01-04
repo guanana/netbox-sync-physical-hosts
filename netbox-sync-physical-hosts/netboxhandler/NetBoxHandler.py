@@ -1,13 +1,20 @@
 import logging
+from distutils.version import StrictVersion
 import pynetbox
 import requests
+from django.utils.text import slugify
 
 
 def get_host_by_ip(nb_ip):
     try:
-        if nb_ip and nb_ip.assigned_object:
+        if nb_ip and hasattr(nb_ip.assigned_object, "device"):
             logging.info(f"{nb_ip}: Host found => {nb_ip.assigned_object.device.name}")
-            return nb_ip.assigned_object.device
+            return nb_ip.assigned_object.device, "device"
+        elif nb_ip and hasattr(nb_ip.assigned_object, "virtual_machine"):
+            logging.info(f"{nb_ip}: Virtual Host found => {nb_ip.assigned_object.virtual_machine.name}")
+            return nb_ip.assigned_object.virtual_machine, "virtual_machine"
+        else:
+            return
     except AttributeError:
         logging.critical("You can only get host from a NB ip object")
         exit(1)
@@ -18,23 +25,25 @@ class NetBoxHandler:
         self.url = url
         self.token = token
         self.tls_verify = not tls_verify
-        self.tag = tag
+        self.scripttag = tag
         self.cleanup_allowed = cleanup_allowed
         self.nb_con = self.connect()
-        self.nb_ver = self.get_version()
-        #Netbox objects
+        self.nb_ver = StrictVersion(self.get_version())
+        # Netbox objects
         logging.info("Caching all Netbox data")
         self.all_ips = self.nb_con.ipam.ip_addresses.all()
         self.all_interfaces = self.nb_con.dcim.interfaces.all()
         self.all_devices = self.nb_con.dcim.devices.all()
         self.all_sites = self.nb_con.dcim.sites.all()
+        self.all_services = self.nb_con.ipam.services.all()
         self.TYPE_MAP = {
             "ip-addresses": self.all_ips,
             "interfaces": self.all_interfaces,
             "devices": self.all_devices,
-            "sites": self.all_sites
+            "sites": self.all_sites,
+            "services": self.all_services
         }
-        #Netbox pre-reqs
+        # Netbox pre-reqs
         self.pre_reqs()
 
     def connect(self):
@@ -50,30 +59,49 @@ class NetBoxHandler:
         except (ConnectionRefusedError, requests.exceptions.MissingSchema):
             logging.critical("Wrong URL or TOKEN, please check your config")
             exit(1)
+        except (requests.exceptions.ConnectionError):
+            logging.critical("Impossible to contact Netbox")
+            exit(1)
 
     def pre_reqs(self):
-        if float(self.nb_ver) >= 2.9:
-            self.tag = self.create_tag()
+        if self.nb_ver >= StrictVersion("2.9"):
+            self.scripttag = self.create_tag(self.scripttag, scripttag=True)
+        else:
+            raise ("This script only works with Netbox > 2.9")
 
-    def create_tag(self):
-        scripttag = self.nb_con.extras.tags.get(name=self.tag)
-        if not scripttag:
-            logging.info("First run on Netbox instance, creating tag")
-            scripttag = self.nb_con.extras.tags.create({"name": self.tag,
-                                                          "slug": self.tag,
-                                                          "description": f"Created by {__file__.split('/')[-3]}",
-                                                          "color": '2196f3'})
-            logging.debug(f"Tag {self.tag} created!")
+    def create_tag(self, tag, scripttag=False):
+        nb_tag = self.nb_con.extras.tags.get(name=tag)
+        if not nb_tag:
+            if scripttag:
+                logging.info("First run on Netbox instance, creating tag")
+            nb_tag = self.nb_con.extras.tags.create({"name": tag,
+                                                     "slug": slugify(tag),
+                                                     "description": f"Created by {__file__.split('/')[-3]}",
+                                                     "color": '2196f3'})
+            logging.debug(f"Tag {tag} created!")
 
-        return scripttag.id
+        return nb_tag
 
     def set_ip_attribute(self, ip, ip_attr):
         mask = ip_attr.get("subnet").split('/')[-1]
         nb_attr = {
             "address": f"{ip}/{mask}",
-            "tags": [self.tag],
-            "dns_name": ip_attr.get("dns_name",""),
-            "description": ip_attr.get("description","")
+            "tags": [self.scripttag.id],
+            "dns_name": ip_attr.get("dns_name", ""),
+            "description": ip_attr.get("description", "")
+        }
+        return nb_attr
+
+    def set_service_attribute(self, host, service, device_type, ip):
+        nb_attr = {
+            device_type: host.id,
+            "name": service["service"]["name"],
+            "description": f"{service['service'].get('product')}: "
+                           f"{service['service'].get('version','version_unknown')}",
+            "tags": [self.scripttag.id],
+            "protocol": service["protocol"],
+            "port": service["portid"],
+            "ipaddresses": [ip.id]
         }
         return nb_attr
 
@@ -84,13 +112,55 @@ class NetBoxHandler:
         return [n for n in self.TYPE_MAP[endpoint] if obj == n.name]
 
     def lookup_ip_address(self, ip):
-        nb_ip = [nb_ip for nb_ip in self.TYPE_MAP["ip-addresses"] if nb_ip.address.startswith(f"{ip}/")]
+        nb_ip = [nb_ip for nb_ip in self.all_ips if nb_ip.address.startswith(f"{ip}/")]
         if not nb_ip:
             return None, True
         if len(nb_ip) == 1:
             return nb_ip[0], True
         else:
             return nb_ip, False
+
+    def lookup_service(self, host, service, device_type, ip):
+        try:
+            if device_type == "device":
+                nb_service = [nb_service for nb_service in self.all_services
+                              if nb_service.device == host and
+                              nb_service.port == int(service["portid"]) and
+                              [True for nb_ip in nb_service.ipaddresses if nb_ip.id == ip["id"]]][0]
+            else:
+                nb_service = [nb_service for nb_service in self.all_services
+                              if nb_service.virtual_machine == host and
+                              nb_service.port == int(service["portid"]) and
+                              [True for nb_ip in nb_service.ipaddresses if nb_ip.id == ip["id"]]][0]
+        except IndexError:
+            return
+        return nb_service
+
+    def nb_create_ip(self, ip_attr):
+        logging.debug(f"{ip_attr.get('address')}: Not found in Netbox, creating record")
+        nb_ip = self.nb_con.ipam.ip_addresses.create()
+        logging.info(f"Record {ip_attr.get('address')} created")
+        return nb_ip
+
+    def nb_create_service(self, service_attr):
+        logging.debug(f"{service_attr.get('name')}: Creating service")
+        nb_service = self.nb_con.ipam.services.create(service_attr)
+        logging.info(f"Service {service_attr.get('name')} created")
+        return nb_service
+
+    def create_service(self, host, service, device_type, nb_ip):
+        logging.info(f"Creating service {service['portid']}")
+        service_attr = self.set_service_attribute(host, service, device_type, nb_ip)
+        nb_service = self.lookup_service(host, service, device_type, nb_ip)
+        if not nb_service:
+            nb_service = self.nb_create_service(service_attr)
+        else:
+            for tag in nb_service.tags:
+                if self.scripttag.id == tag.id:
+                    nb_service.update(service_attr)
+                    return nb_service
+            logging.info(f"Service {service['portid']} found but scripttags is not present, skipping update")
+        return nb_service
 
     def run(self, scanned_hosts):
         logging.debug(f"Netbox version: {self.nb_ver}")
@@ -99,14 +169,17 @@ class NetBoxHandler:
             if not single:
                 logging.warning(f"Found {ip.address} duplicated")
             if nb_ip:
-                nb_host = get_host_by_ip(nb_ip)
+                nb_host, device_type = get_host_by_ip(nb_ip)
                 if not nb_host:
                     logging.debug(f"Not host found for {ip}")
+                    continue
                 else:
+                    if attr.get("services"):
+                        for port, service in attr["services"].items():
+                            self.create_service(nb_host, service, device_type, nb_ip)
+                        logging.debug(f"Found ports: {nb_host} with ip {ip}")
                     # TODO: Check what to do
                     logging.debug(f"Found host: {nb_host} with ip {ip}")
             else:
-                logging.debug(f"{ip}: Not found in Netbox, creating record")
-                logging.debug(self.nb_con.ipam.ip_addresses.create(self.set_ip_attribute(ip, attr)))
-                logging.info(f"Record {ip} created")
-
+                ip_attr = self.set_ip_attribute(ip, attr)
+                self.nb_create_ip(ip_attr)

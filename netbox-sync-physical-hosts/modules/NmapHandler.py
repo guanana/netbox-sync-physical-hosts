@@ -121,7 +121,7 @@ class NmapServiceScan(NmapBasic):
         for host in self.scan_results:
             self.scan_service(host)
         self.append_service_results()
-        print(self.services)
+        return self.scan_results
 
     def append_service_results(self):
         self.sanitaise_services()

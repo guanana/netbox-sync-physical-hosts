@@ -23,7 +23,7 @@ class NetboxHandlerCase(unittest.TestCase):
         con = Api("test")
         mock_api.return_value = con
         response = NetBoxHandler("http://localhost:8000", "1234",
-                                 False, "test", False, ({1: "test"},{2:"test"}))
+                                 False, "test", False)
         response.nb_ver = "2.9"
         # Assert that the request-response cycle completed successfully.
         self.assertIsInstance(response, NetBoxHandler)
