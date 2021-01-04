@@ -22,8 +22,8 @@ jobs:
         pip install -r requirements.txt
     - name: Add path
       run: |
-        echo "PYTHONPATH=/home/runner/work/netbox-sync-physical-hosts>> $GITHUB_ENV"
-        echo "PYTHONPATH=/home/runner/work/netbox-sync-physical-hosts/netbox-sync-physical-hosts>> $GITHUB_ENV
+        echo "PYTHONPATH=$( pwd -P)/../:$PYTHONPATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts:/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts/netbox-sync-physical-hosts/modules:/home/runner/work/netbox-sync-physical-hosts/Netbox-sync-physical-hosts/netbox-sync-physical-hosts/netboxhandler:$PYTHONPATH" >> $GITHUB_ENV
     - name: Generate coverage report
       run: |
         pytest --cov=./ --cov-report=xml
