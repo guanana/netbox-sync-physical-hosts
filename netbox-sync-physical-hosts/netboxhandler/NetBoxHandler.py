@@ -29,8 +29,6 @@ class NetBoxHandler:
         self.tls_verify = not tls_verify
         self.scripttag = tag
         self.cleanup_allowed = cleanup_allowed
-        self.nb_con = self.connect()
-        self.nb_ver = StrictVersion(self.get_version())
         # Netbox objects
         logging.info("Caching all Netbox data")
         self.all_ips = self.nb_con.ipam.ip_addresses.all()
@@ -48,20 +46,22 @@ class NetBoxHandler:
         # Netbox pre-reqs
         self.pre_reqs()
 
-    def connect(self):
+    @property
+    def nb_con(self):
         session = requests.Session()
         session.verify = self.tls_verify
         nb_con = pynetbox.api(self.url, self.token, threading=True)
         nb_con.http_session = session
         return nb_con
 
-    def get_version(self):
+    @property
+    def nb_ver(self):
         try:
-            return self.nb_con.version
+            return StrictVersion(self.nb_con.version)
         except (ConnectionRefusedError, requests.exceptions.MissingSchema):
             logging.critical("Wrong URL or TOKEN, please check your config")
             exit(1)
-        except (requests.exceptions.ConnectionError):
+        except requests.exceptions.ConnectionError:
             logging.critical("Impossible to contact Netbox")
             exit(1)
 

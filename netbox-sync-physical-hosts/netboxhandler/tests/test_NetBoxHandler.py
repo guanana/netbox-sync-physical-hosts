@@ -1,6 +1,6 @@
 import unittest
 from distutils.version import StrictVersion
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import pynetbox
 from pynetbox.core.api import Api
 from NetBoxHandler import NetBoxHandler, get_host_by_ip
@@ -16,7 +16,7 @@ class Device:
 
 
 class Ip:
-    assigned_object = Device
+    assigned_object = Device()
 
 
 class NetboxHandlerCase(unittest.TestCase):
@@ -26,7 +26,8 @@ class NetboxHandlerCase(unittest.TestCase):
     def test_api_response_mock(self, mock_api, mock_version):
         # Call the function, which will send a request to the server.
         con = Api("test")
-        con.version = "2.9"
+        inst = mock_version.return_value
+        inst.version = "2.9"
         mock_api.return_value = con
         response = NetBoxHandler("http://localhost:8000", "1234",
                                  False, "test", False)
@@ -38,9 +39,10 @@ class NetboxHandlerCase(unittest.TestCase):
     def test_get_hosts_by_api(self):
         # Test return object
         nb_ip = Ip()
-        test = get_host_by_ip(nb_ip)
+        test, device_type = get_host_by_ip(nb_ip)
         # Assert that the request-response cycle completed successfully.
         self.assertIsInstance(test, Name)
+        self.assertEqual(device_type,"device")
 
 
 if __name__ == '__main__':
