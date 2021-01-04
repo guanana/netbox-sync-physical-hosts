@@ -14,7 +14,7 @@ def get_host_by_ip(nb_ip):
             logging.info(f"{nb_ip}: Virtual Host found => {nb_ip.assigned_object.virtual_machine.name}")
             return nb_ip.assigned_object.virtual_machine, "virtual_machine"
         else:
-            return
+            return None, None
     except AttributeError:
         logging.critical("You can only get host from a NB ip object")
         exit(1)
