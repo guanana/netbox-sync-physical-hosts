@@ -21,7 +21,8 @@ class NmapBasic(object):
     def basic_scan(self):
         logging.info(f"Start NMAP scan for {self.networks}")
         for item in self.networks:
-            self.scan_results = self.nmap.nmap_no_portscan(item, args="-R --system-dns")
+            self.scan_results = self.nmap.nmap_no_portscan(item,
+                                                           args="-R --system-dns")
             self.scan_results.pop("stats")
             self.scan_results.pop("runtime")
             for host, v in self.scan_results.items():
@@ -114,7 +115,7 @@ class NmapServiceScan(NmapBasic):
     def scan_service(self, host):
         # TODO: Investigate more if this can be parallelize
         logging.debug(f"Scan started for host: {host}")
-        self.services[host] = self.nmap.nmap_version_detection(target=host,args="-F -T4")
+        self.services[host] = self.nmap.nmap_version_detection(host, args="-F -T4")
 
     def scan(self):
         logging.info(f"Starting Service scan for hosts in {self.networks}")
@@ -132,7 +133,11 @@ class NmapServiceScan(NmapBasic):
 
     def sanitaise_services(self):
         for host, value in self.services.items():
-            self.services[host] = value[host]["ports"]
+            try:
+                self.services[host] = value[host]["ports"]
+            except KeyError:
+                logging.debug(f"No services detected for {host}")
+                continue
             for service in self.services[host]:
                 try:
                     service.pop("reason")

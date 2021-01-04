@@ -8,10 +8,12 @@ from django.utils.text import slugify
 def get_host_by_ip(nb_ip):
     try:
         if nb_ip and hasattr(nb_ip.assigned_object, "device"):
-            logging.info(f"{nb_ip}: Host found => {nb_ip.assigned_object.device.name}")
+            logging.info(f"{nb_ip}: Host found => "
+                         f"{nb_ip.assigned_object.device.name}")
             return nb_ip.assigned_object.device, "device"
         elif nb_ip and hasattr(nb_ip.assigned_object, "virtual_machine"):
-            logging.info(f"{nb_ip}: Virtual Host found => {nb_ip.assigned_object.virtual_machine.name}")
+            logging.info(f"{nb_ip}: Virtual Host found => "
+                         f"{nb_ip.assigned_object.virtual_machine.name}")
             return nb_ip.assigned_object.virtual_machine, "virtual_machine"
         else:
             return None, None
@@ -74,10 +76,12 @@ class NetBoxHandler:
         if not nb_tag:
             if scripttag:
                 logging.info("First run on Netbox instance, creating tag")
-            nb_tag = self.nb_con.extras.tags.create({"name": tag,
-                                                     "slug": slugify(tag),
-                                                     "description": f"Created by {__file__.split('/')[-3]}",
-                                                     "color": '2196f3'})
+            nb_tag = self.nb_con.extras.tags.create(
+                {"name": tag,
+                 "slug": slugify(tag),
+                 "description": f"Created by {__file__.split('/')[-3]}",
+                 "color": '2196f3'}
+            )
             logging.debug(f"Tag {tag} created!")
 
         return nb_tag
@@ -126,12 +130,14 @@ class NetBoxHandler:
                 nb_service = [nb_service for nb_service in self.all_services
                               if nb_service.device == host and
                               nb_service.port == int(service["portid"]) and
-                              [True for nb_ip in nb_service.ipaddresses if nb_ip.id == ip["id"]]][0]
+                              [True for nb_ip in nb_service.ipaddresses
+                               if nb_ip.id == ip["id"]]][0]
             else:
                 nb_service = [nb_service for nb_service in self.all_services
                               if nb_service.virtual_machine == host and
                               nb_service.port == int(service["portid"]) and
-                              [True for nb_ip in nb_service.ipaddresses if nb_ip.id == ip["id"]]][0]
+                              [True for nb_ip in nb_service.ipaddresses
+                               if nb_ip.id == ip["id"]]][0]
         except IndexError:
             return
         return nb_service
@@ -159,7 +165,9 @@ class NetBoxHandler:
                 if self.scripttag.id == tag.id:
                     nb_service.update(service_attr)
                     return nb_service
-            logging.info(f"Service {service['portid']} found but scripttags is not present, skipping update")
+            logging.info(f"Service {service['portid']} "
+                         f"found but scripttags is not present, "
+                         f"skipping update")
         return nb_service
 
     def run(self, scanned_hosts):
