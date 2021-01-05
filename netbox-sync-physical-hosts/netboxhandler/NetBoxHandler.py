@@ -69,7 +69,7 @@ class NetBoxHandler:
         if self.nb_ver >= StrictVersion("2.9"):
             self.scripttag = self.create_tag(self.scripttag, scripttag=True)
         else:
-            raise ("This script only works with Netbox > 2.9")
+            raise Exception("This script only works with Netbox > 2.9")
 
     def create_tag(self, tag, scripttag=False):
         nb_tag = self.nb_con.extras.tags.get(name=tag)
