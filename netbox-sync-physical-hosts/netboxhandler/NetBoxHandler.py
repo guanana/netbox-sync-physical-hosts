@@ -87,7 +87,11 @@ class NetBoxHandler:
         return nb_tag
 
     def set_ip_attribute(self, ip, ip_attr):
-        mask = ip_attr.get("subnet").split('/')[-1]
+        try:
+            mask = ip_attr.get("subnet").split('/')[-1]
+        except AttributeError:
+            logging.error(f"Problem with IP {ip}")
+            return None
         nb_attr = {
             "address": f"{ip}/{mask}",
             "tags": [self.scripttag.id],
@@ -190,4 +194,7 @@ class NetBoxHandler:
                     logging.debug(f"Found host: {nb_host} with ip {ip}")
             else:
                 ip_attr = self.set_ip_attribute(ip, attr)
-                self.nb_create_ip(ip_attr)
+                if ip_attr:
+                    self.nb_create_ip(ip_attr)
+                else:
+                    logging.error(f"Problem found, IP not created")

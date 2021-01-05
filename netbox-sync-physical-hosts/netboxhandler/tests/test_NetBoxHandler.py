@@ -1,10 +1,7 @@
-import os
-import unittest
-from distutils.version import StrictVersion
-from unittest.mock import patch, MagicMock
-import pynetbox
-from pynetbox.core.api import Api
-from NetBoxHandler import NetBoxHandler, get_host_by_ip
+import pytest
+from unittest.mock import MagicMock, PropertyMock
+
+from NetBoxHandler import get_host_by_ip, NetBoxHandler
 
 
 # NB Model classes
@@ -20,31 +17,40 @@ class Ip:
     assigned_object = Device()
 
 
-class NetboxHandlerCase(unittest.TestCase):
+class VirtualMachine:
+    virtual_machine = Name()
 
-    @patch('pynetbox.api')
-    @patch.object(pynetbox.api, 'version', version='2.9')
-    def test_api_response_mock(self, mock_api, mock_version):
-        # Call the function, which will send a request to the server.
-        con = Api("test")
-        inst = mock_version.return_value
-        inst.version = "2.9"
-        mock_api.return_value = con
-        response = NetBoxHandler("http://localhost:8000", "1234",
+
+class IpVirtual:
+    assigned_object = VirtualMachine()
+
+
+def test_get_host_by_ip():
+    nb_device_ip = Ip()
+    test, device_type = get_host_by_ip(nb_device_ip)
+    assert(isinstance(test, Name))
+    assert device_type == "device"
+    nb_virtual_ip = IpVirtual()
+    test, device_type = get_host_by_ip(nb_virtual_ip)
+    assert(isinstance(test, Name))
+    assert device_type == "virtual_machine"
+
+@pytest.fixture()
+def mock_pynetbox_con(monkeypatch):
+    mock_pynetbox_con = MagicMock()
+    monkeypatch.setattr('pynetbox.api', mock_pynetbox_con)
+    type(mock_pynetbox_con.return_value).version = PropertyMock(return_value="2.9")
+    return mock_pynetbox_con
+
+@pytest.fixture()
+def nb(mock_pynetbox_con):
+    nb = NetBoxHandler("http://localhost:8000", "1234",
                                  False, "test", False)
-        # Assert that the request-response cycle completed successfully.
-        self.assertIsInstance(response, NetBoxHandler)
-        self.assertEqual(response.nb_ver, "2.9")
-        self.assertEqual(response.token, "1234")
+    return nb
 
-    def test_get_hosts_by_api(self):
-        # Test return object
-        nb_ip = Ip()
-        test, device_type = get_host_by_ip(nb_ip)
-        # Assert that the request-response cycle completed successfully.
-        self.assertIsInstance(test, Name)
-        self.assertEqual(device_type,"device")
+def test_NetboxHandlerrun(nb):
+    nb.all_ips = []
+    nb.run({"127.0.0.1": {}})
+    nb.run({'192.168.4.1': {'macaddress': "00:11:22:33:44:55", 'subnet': '192.168.4.0/24'}})
+    nb.run({'192.168.4.2': {'macaddress': None, 'subnet': '192.168.4.0/24', 'dns_name': 'test.test.local'}})
 
-
-if __name__ == '__main__':
-    unittest.main()
