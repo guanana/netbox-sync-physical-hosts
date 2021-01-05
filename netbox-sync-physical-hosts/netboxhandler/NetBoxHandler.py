@@ -48,11 +48,15 @@ class NetBoxHandler:
 
     @property
     def nb_con(self):
-        session = requests.Session()
-        session.verify = self.tls_verify
-        nb_con = pynetbox.api(self.url, self.token, threading=True)
-        nb_con.http_session = session
-        return nb_con
+        try:
+            session = requests.Session()
+            session.verify = self.tls_verify
+            nb_con = pynetbox.api(self.url, self.token, threading=True)
+            nb_con.http_session = session
+            return nb_con
+        except requests.exceptions.ConnectionError:
+            logging.critical("Impossible to contact Netbox")
+            exit(1)
 
     @property
     def nb_ver(self):
@@ -61,9 +65,7 @@ class NetBoxHandler:
         except (ConnectionRefusedError, requests.exceptions.MissingSchema):
             logging.critical("Wrong URL or TOKEN, please check your config")
             exit(1)
-        except requests.exceptions.ConnectionError:
-            logging.critical("Impossible to contact Netbox")
-            exit(1)
+
 
     def pre_reqs(self):
         if self.nb_ver >= StrictVersion("2.9"):

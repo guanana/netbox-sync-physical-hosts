@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import MagicMock, PropertyMock
 
+import requests
+
 from NetBoxHandler import get_host_by_ip, NetBoxHandler
 
 
@@ -63,18 +65,24 @@ def mock_pynetbox_con(monkeypatch):
 def mock_netbox_ver(mock_pynetbox_con, monkeypatch):
     type(mock_pynetbox_con.return_value).version = PropertyMock(return_value="2.9")
 
+#TODO: Pending
+def test_nb_unreachable():
+    with pytest.raises(requests.exceptions.ConnectionError):
+        nb = NetBoxHandler("http://test:8000", "1234",
+                                 False, "test", False)
 
 def test_nb_wrong_version(mock_pynetbox_con):
     type(mock_pynetbox_con.return_value).version = PropertyMock(return_value="2.8")
     with pytest.raises(Exception):
-        NetBoxHandler("http://localhost:8000", "1234",
+        NetBoxHandler("http://test:8000", "1234",
                                  False, "test", False)
 
 @pytest.fixture()
 def nb(mock_pynetbox_con, mock_netbox_ver):
-    nb = NetBoxHandler("http://localhost:8000", "1234",
+    nb = NetBoxHandler("http://test:8000", "1234",
                                  False, "test", False)
     return nb
+
 
 def test_NetboxHandlerrun(nb):
     nb.all_ips = []
