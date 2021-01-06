@@ -110,16 +110,16 @@ export NETBOX_TOKEN=your-token-here
 export NETWORKS=your-networks-separated-by-comma-here
 ```
 
-###Get Services
+##Get Services
 
 Be aware that if you activate get service option `it will take between 15sec and 30sec per host` (so it can be slow)
 
-###Get Mac
+##Get Mac
 
 This service is pretty fast but will only work if the scan is performed from the same subnet 
 ie: scanning subnet `192.168.1.0/24` from `192.168.1.2`
 
-###Help
+##Help
 
 ```sh
  python netbox-sync.py --help
