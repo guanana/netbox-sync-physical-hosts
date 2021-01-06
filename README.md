@@ -32,7 +32,14 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li>
+      <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#get-services">Get Services</a></li>
+        <li><a href="#get-mac-address">Get MAC address info</a></li>
+        <li><a href="#help">Help</a></li>
+      </ul>
+    </li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -110,16 +117,19 @@ export NETBOX_TOKEN=your-token-here
 export NETWORKS=your-networks-separated-by-comma-here
 ```
 
+
 <!-- Get Service -->
 ###Get Services
 
 Be aware that if you activate get service option `it will take between 15sec and 30sec per host` (so it can be slow)
+
 
 <!-- Get Mac -->
 ###Get Mac address
 
 This service is pretty fast but will only work if the scan is performed from the same subnet 
 ie: scanning subnet `192.168.1.0/24` from `192.168.1.2`
+
 
 <!-- Get Help -->
 ###Help
@@ -150,6 +160,7 @@ optional arguments:
   -o, --get_mac         Enable if you want the script to try to collect MAC addresses/vendor [env var: MAC_DISCOVER]
   -s, --get_services    Enable if you want the script to discover host services [env var: SERVICE_DISCOVER]
 ```
+
 
 <!-- CONTRIBUTING -->
 ## Contributing
