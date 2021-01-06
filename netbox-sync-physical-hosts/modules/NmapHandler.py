@@ -129,7 +129,10 @@ class NmapServiceScan(NmapBasic):
         for host, value in self.services.items():
             self.scan_results[host]["services"] = {}
             for service in value:
-                self.scan_results[host]["services"][service['portid']] = service
+                try:
+                    self.scan_results[host]["services"][service['portid']] = service
+                except TypeError:
+                    pass
 
     def sanitaise_services(self):
         for host, value in self.services.items():

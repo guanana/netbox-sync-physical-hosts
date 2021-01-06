@@ -17,7 +17,7 @@ service_result = {'127.0.0.1': {'osmatch': {}, 'ports':
                             'service':
                                 {'name': 'ssh', 'product': 'OpenSSH', 'version': '7.4p1 Debian 10+deb9u7',
                                  'extrainfo': 'protocol 2.0', 'ostype': 'Linux', 'method': 'probed', 'conf': '10'},
-                            'cpe': [{'cpe': 'cpe:/o:linux:linux_kernel'}], 'scripts': []},
+                            'scripts': []},
                            {'protocol': 'tcp', 'portid': '80', 'state': 'open', 'reason': 'syn-ack', 'reason_ttl': '0',
                             'service': {'name': 'http', 'product': 'lighttpd', 'method': 'probed', 'conf': '10'},
                             'cpe': [{'cpe': 'cpe:/a:lighttpd:lighttpd'}], 'scripts': []},
@@ -34,6 +34,13 @@ service_result = {'127.0.0.1': {'osmatch': {}, 'ports':
                                    'summary': 'Nmap done at Wed Jan  6 02:48:11 2021; 1 IP address (1 host up) scanned in 30.27 seconds',
                                    'exit': 'success'}}
 
+service_result_no_ports = {'127.0.0.1': {'osmatch': {}},
+                       'stats': {'scanner': 'nmap', 'args': '/usr/local/bin/nmap -oX - -sV -F -T4 192.168.4.1',
+                                 'start': '1609901261', 'startstr': 'Wed Jan  6 02:47:41 2021', 'version': '7.40',
+                                 'xmloutputversion': '1.04'},
+                       'runtime': {'time': '1609901291', 'timestr': 'Wed Jan  6 02:48:11 2021', 'elapsed': '30.27',
+                                   'summary': 'Nmap done at Wed Jan  6 02:48:11 2021; 1 IP address (1 host up) scanned in 30.27 seconds',
+                                   'exit': 'success'}}
 
 def create_result_dicts(add_dict: str):
     options = {
@@ -118,6 +125,13 @@ def test_nmapmacscanrun_nomac(monkeypatch, nmapscanrun_aux):
 def test_nmapservicescanrun(monkeypatch):
     aux_mockportscan(monkeypatch, "simple_one_host_service")
     mock_result = MagicMock(return_value=service_result)
+    monkeypatch.setattr('nmap3.Nmap.nmap_version_detection', mock_result)
+    nmap = NmapServiceScan("test")
+    nmap.run()
+
+def test_nmapservicescanrun_noservices(monkeypatch):
+    aux_mockportscan(monkeypatch, "simple_one_host")
+    mock_result = MagicMock(return_value=service_result_no_ports)
     monkeypatch.setattr('nmap3.Nmap.nmap_version_detection', mock_result)
     nmap = NmapServiceScan("test")
     nmap.run()
