@@ -97,7 +97,7 @@ class NmapMacScan(NmapBasic):
         :return: scan_results = list()
         """
         for host, v in self.scan_results.items():
-            if self.update_mac(host):
+            if v.get("macaddress") or self.update_mac(host):
                 self.update_vendor(ip=host)
             self.correct_missing_mac(host)
         return self.scan_results

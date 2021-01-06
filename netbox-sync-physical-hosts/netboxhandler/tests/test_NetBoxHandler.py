@@ -45,7 +45,6 @@ def test_correct_instance_get_host_by_ip():
 def test_invalid_get_host_by_ip():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         get_host_by_ip("wrong")
-        assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
 
 
@@ -54,6 +53,12 @@ def test_invalid_object_get_host_by_ip():
     assert not test
     assert not device_type
 
+# TODO: PENDING TO IMPLEMENT
+# @pytest.fixture()
+# def mock_pynetbox_session(monkeypatch):
+#     mock_pynetbox_session = MagicMock()
+#     monkeypatch.setattr('requests.Response', mock_pynetbox_session)
+#     return mock_pynetbox_session
 
 @pytest.fixture()
 def mock_pynetbox_con(monkeypatch):
@@ -65,11 +70,27 @@ def mock_pynetbox_con(monkeypatch):
 def mock_netbox_ver(mock_pynetbox_con, monkeypatch):
     type(mock_pynetbox_con.return_value).version = PropertyMock(return_value="2.9")
 
-#TODO: Pending
-def test_nb_unreachable():
-    with pytest.raises(requests.exceptions.ConnectionError):
-        nb = NetBoxHandler("http://test:8000", "1234",
+
+def test_nb_host_unreachable():
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        NetBoxHandler("http://test:8000", "1234",
                                  False, "test", False)
+        assert pytest_wrapped_e.value.code == 1
+
+
+def test_nb_wrong_schema():
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        NetBoxHandler("test", "1234",
+                                 False, "test", False)
+        assert pytest_wrapped_e.value.code == 1
+
+# TODO: PENDING TO IMPLEMENT
+# def test_nb_invalid_token(mock_pynetbox_session):
+#     with pytest.raises(SystemExit) as pytest_wrapped_e:
+#         NetBoxHandler("http://test:8000", "1234",
+#                                  False, "test", False)
+#         assert pytest_wrapped_e.value.code == 1
+
 
 def test_nb_wrong_version(mock_pynetbox_con):
     type(mock_pynetbox_con.return_value).version = PropertyMock(return_value="2.8")
@@ -89,4 +110,3 @@ def test_NetboxHandlerrun(nb):
     nb.run({"127.0.0.1": {}})
     nb.run({'192.168.4.1': {'macaddress': "00:11:22:33:44:55", 'subnet': '192.168.4.0/24'}})
     nb.run({'192.168.4.2': {'macaddress': None, 'subnet': '192.168.4.0/24', 'dns_name': 'test.test.local'}})
-

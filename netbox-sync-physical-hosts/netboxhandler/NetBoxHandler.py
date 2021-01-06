@@ -1,5 +1,6 @@
 import logging
 from distutils.version import StrictVersion
+from pynetbox.core.query import RequestError as pynetbox_RequestError
 import pynetbox
 import requests
 from django.utils.text import slugify
@@ -29,13 +30,19 @@ class NetBoxHandler:
         self.tls_verify = not tls_verify
         self.scripttag = tag
         self.cleanup_allowed = cleanup_allowed
+        self.nb_con = self.nb_con()
+        self.nb_ver = self.nb_ver()
         # Netbox objects
         logging.info("Caching all Netbox data")
-        self.all_ips = self.nb_con.ipam.ip_addresses.all()
-        self.all_interfaces = self.nb_con.dcim.interfaces.all()
-        self.all_devices = self.nb_con.dcim.devices.all()
-        self.all_sites = self.nb_con.dcim.sites.all()
-        self.all_services = self.nb_con.ipam.services.all()
+        try:
+            self.all_ips = self.nb_con.ipam.ip_addresses.all()
+            self.all_interfaces = self.nb_con.dcim.interfaces.all()
+            self.all_devices = self.nb_con.dcim.devices.all()
+            self.all_sites = self.nb_con.dcim.sites.all()
+            self.all_services = self.nb_con.ipam.services.all()
+        except pynetbox_RequestError:
+            logging.critical("Invalid token")
+            exit(1)
         self.TYPE_MAP = {
             "ip-addresses": self.all_ips,
             "interfaces": self.all_interfaces,
@@ -46,26 +53,25 @@ class NetBoxHandler:
         # Netbox pre-reqs
         self.pre_reqs()
 
-    @property
     def nb_con(self):
-        try:
-            session = requests.Session()
-            session.verify = self.tls_verify
-            nb_con = pynetbox.api(self.url, self.token, threading=True)
-            nb_con.http_session = session
-            return nb_con
-        except requests.exceptions.ConnectionError:
-            logging.critical("Impossible to contact Netbox")
-            exit(1)
+        session = requests.Session()
+        session.verify = self.tls_verify
+        nb_con = pynetbox.api(self.url, self.token, threading=True)
+        nb_con.http_session = session
+        return nb_con
 
-    @property
     def nb_ver(self):
         try:
             return StrictVersion(self.nb_con.version)
-        except (ConnectionRefusedError, requests.exceptions.MissingSchema):
+        except ConnectionRefusedError:
             logging.critical("Wrong URL or TOKEN, please check your config")
             exit(1)
-
+        except requests.exceptions.MissingSchema:
+            logging.critical(f"{self.url}: URL format should contain http or https")
+            exit(1)
+        except requests.exceptions.ConnectionError:
+            logging.critical(f"{self.url}: Impossible to contact Netbox")
+            exit(1)
 
     def pre_reqs(self):
         if self.nb_ver >= StrictVersion("2.9"):
