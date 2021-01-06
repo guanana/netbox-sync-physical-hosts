@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/guanana/netbox-sync-physical-hosts">
-    <img src="images/logo.png" alt="Logo" width="160" height="160">
+    <img src="images/logo.png" alt="Logo" width="320" height="160">
   </a>
 
   <h3 align="center">netbox-sync-physical-hosts</h3>
