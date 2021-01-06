@@ -1,6 +1,6 @@
 import os
-from NetBoxHandler import NetBoxHandler
-from NmapHandler import NmapServiceScan, NmapMacScan, NmapBasic
+from netboxhandler.NetBoxHandler import NetBoxHandler
+from modules.NmapHandler import NmapServiceScan, NmapMacScan, NmapBasic
 import configargparse
 import logging
 
@@ -25,7 +25,7 @@ p.add('-x', '--nb_ignore-tls-errors', action='store_true',
 
 p.add('-f', '--clenaup', action='store_true', help="Cleanup orphans")
 
-p.add('-t', '--tag', help="Tag to use for device identification")
+p.add('-t', '--tag', help="Tag to use for device identification", env_var="TAG")
 
 p.add('-n', '--networks', required=True, help="Networks/Hosts to scan",
       env_var="NETWORKS")
