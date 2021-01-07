@@ -1,7 +1,7 @@
 import logging
+import getmac
 import nmap3
 from mac_vendor_lookup import MacLookup
-from getmac import get_mac_address
 
 
 class NmapBasic(object):
@@ -60,7 +60,7 @@ class NmapMacScan(NmapBasic):
         :param ip: IP address (ie: 192.168.1.1)
         :return: True if MAC is found, False otherwise
         """
-        mac = get_mac_address(ip=ip, network_request=True)
+        mac = getmac.get_mac_address(ip=ip)
         if mac is None:
             return False
         else:
@@ -75,11 +75,8 @@ class NmapMacScan(NmapBasic):
         """
         logging.debug("Updating MAC table")
         self.mac_search.update_vendors()
-        try:
-            vendor_fetch = self.mac_search.lookup(self.scan_results[ip]["macaddress"])
-            self.scan_results[ip]["vendor"] = vendor_fetch
-        except KeyError:
-            pass
+        vendor_fetch = self.mac_search.lookup(self.scan_results[ip]["macaddress"])
+        self.scan_results[ip]["vendor"] = vendor_fetch
 
     def correct_missing_mac(self, host):
         """
