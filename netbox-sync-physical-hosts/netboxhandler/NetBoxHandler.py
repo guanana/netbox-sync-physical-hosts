@@ -95,9 +95,10 @@ class NetBoxHandler:
         return nb_tag
 
     def set_ip_attribute(self, ip, ip_attr):
-        try:
-            mask = ip_attr.get("subnet").split('/')[-1]
-        except AttributeError:
+        pre_mask = ip_attr.get("subnet").split('/')
+        if len(pre_mask) == 2:
+            mask = pre_mask[-1]
+        else:
             logging.error(f"Problem with IP {ip}")
             return None
         nb_attr = {
@@ -187,7 +188,8 @@ class NetBoxHandler:
         for ip, attr in scanned_hosts.items():
             nb_ip, single = self.lookup_ip_address(ip)
             if not single:
-                logging.warning(f"Found {ip.address} duplicated")
+                logging.warning(f"Found {ip} duplicated, skipping")
+                continue
             if nb_ip:
                 nb_host, device_type = get_host_by_ip(nb_ip)
                 if not nb_host:
