@@ -43,13 +43,6 @@ class NetBoxHandler:
         except pynetbox_RequestError:
             logging.critical("Invalid token")
             exit(1)
-        self.TYPE_MAP = {
-            "ip-addresses": self.all_ips,
-            "interfaces": self.all_interfaces,
-            "devices": self.all_devices,
-            "sites": self.all_sites,
-            "services": self.all_services
-        }
         # Netbox pre-reqs
         self.pre_reqs()
 
@@ -121,12 +114,6 @@ class NetBoxHandler:
             "ipaddresses": [ip.id]
         }
         return nb_attr
-
-    def lookup_nb_obj(self, nb_obj):
-        return [n for n in self.TYPE_MAP[nb_obj.endpoint.name] if nb_obj.name == n.name]
-
-    def lookup_str_obj(self, obj, endpoint):
-        return [n for n in self.TYPE_MAP[endpoint] if obj == n.name]
 
     def lookup_ip_address(self, ip):
         nb_ip = [nb_ip for nb_ip in self.all_ips if nb_ip.address.startswith(f"{ip}/")]
