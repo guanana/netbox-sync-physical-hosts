@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/gh/guanana/netbox-sync-physical-hosts/branch/main/graph/badge.svg?token=AJUM01SDMX)](https://codecov.io/gh/guanana/netbox-sync-physical-hosts)
+[![Known Vulnerabilities](https://snyk.io/test/github/guanana/netbox-sync-physical-hosts/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/guanana/netbox-sync-physical-hosts?targetFile=requirements.txt)
 <br />
 <p align="center">
   <a href="https://github.com/guanana/netbox-sync-physical-hosts">
