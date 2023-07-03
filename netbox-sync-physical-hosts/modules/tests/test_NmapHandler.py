@@ -10,7 +10,9 @@ basic_result = {
     'runtime': {'time': '1609858372', 'timestr': 'Tue Jan  1 14:52:52 1988', 'elapsed': '0.01',
                 'summary': 'Nmap done at Tue Jan  5 14:52:52 2021; 1 IP address (1 host up) scanned in 0.01 seconds',
                 'exit': 'success'
-                }
+                },
+    'task_results': [{'task': 'Ping Scan', 'time': '1688348552', 'extrainfo': '128 total hosts'},
+     {'task': 'System DNS resolution of 128 hosts.', 'time': '1688348553'}]
 }
 service_result = {'127.0.0.1': {'osmatch': {}, 'ports':
     [{'protocol': 'tcp', 'portid': '22', 'state': 'open', 'reason': 'syn-ack', 'reason_ttl': '0',
@@ -72,6 +74,12 @@ def create_result_dicts(add_dict: str):
                         'state': {'state': 'up', 'reason': 'mock-test', 'reason_ttl': '0'}
                         }
         },
+        'simple_one_host_mac_ff': {
+            '1.1.1.1': {'osmatch': {}, 'ports': [], 'macaddress': 'ff:ff:ff:ff:ff:ff',
+                        'hostname': [{'name': 'localhost', 'type': 'PTR'}],
+                        'state': {'state': 'up', 'reason': 'mock-test', 'reason_ttl': '0'}
+                        }
+        },
         'simple_one_host_service': {
             '127.0.0.1': {'osmatch': {}, 'ports': [],
                           'hostname': [{'name': 'localhost', 'type': 'PTR'}],
@@ -120,6 +128,13 @@ def test_nmap_mac_scan_run_no_mac(monkeypatch, mock_mac_vendor):
     aux_mockportscan(monkeypatch, "simple_one_host_no_mac")
     mock_mac_vendor.return_value = None
     nmap = NmapMacScan("test_no_mac")
+    nmap.run()
+    assert not nmap.scan_results['1.1.1.1'].get("vendor")
+
+def test_nmap_mac_scan_run_mac_ff(monkeypatch, mock_mac_vendor):
+    aux_mockportscan(monkeypatch, "simple_one_host_mac_ff")
+    mock_mac_vendor.return_value = None
+    nmap = NmapMacScan("test_mac_ff")
     nmap.run()
     assert not nmap.scan_results['1.1.1.1'].get("vendor")
 

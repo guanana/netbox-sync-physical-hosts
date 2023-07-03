@@ -1,7 +1,7 @@
 import logging
 import getmac
 import nmap3
-from mac_vendor_lookup import MacLookup
+from mac_vendor_lookup import MacLookup, VendorNotFoundError
 
 
 class NmapBasic(object):
@@ -25,6 +25,7 @@ class NmapBasic(object):
                                                            args="-R --system-dns")
             self.scan_results.pop("stats")
             self.scan_results.pop("runtime")
+            self.scan_results.pop("task_results")
             for host, v in self.scan_results.items():
                 self.scan_results[host]["subnet"] = item
                 self.sanitaise_dict(host)
@@ -61,7 +62,7 @@ class NmapMacScan(NmapBasic):
         :return: True if MAC is found, False otherwise
         """
         mac = getmac.get_mac_address(ip=ip)
-        if mac is None:
+        if mac is None or mac == 'ff:ff:ff:ff:ff:ff':
             return False
         else:
             self.scan_results[ip]["macaddress"] = mac
@@ -73,9 +74,10 @@ class NmapMacScan(NmapBasic):
         :param ip: IP address (ie: 192.168.1.1)
         :return: None
         """
-        logging.debug("Updating MAC table")
-        self.mac_search.update_vendors()
-        vendor_fetch = self.mac_search.lookup(self.scan_results[ip]["macaddress"])
+        try:
+            vendor_fetch = self.mac_search.lookup(self.scan_results[ip]["macaddress"])
+        except VendorNotFoundError:
+            vendor_fetch = "NotFound"
         self.scan_results[ip]["vendor"] = vendor_fetch
 
     def correct_missing_mac(self, host):
@@ -93,6 +95,8 @@ class NmapMacScan(NmapBasic):
         Scan defined networks and conditionally check for mac vendor
         :return: scan_results = list()
         """
+        logging.debug("Updating MAC table")
+        self.mac_search.update_vendors()
         for host, v in self.scan_results.items():
             if v.get("macaddress") or self.update_mac(host):
                 self.update_vendor(ip=host)
