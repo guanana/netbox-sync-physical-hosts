@@ -144,7 +144,7 @@ class NetBoxHandler:
 
     def nb_create_ip(self, ip_attr):
         logging.debug(f"{ip_attr.get('address')}: Not found in Netbox, creating record")
-        nb_ip = self.nb_con.ipam.ip_addresses.create()
+        nb_ip = self.nb_con.ipam.ip_addresses.create(ip_attr)
         logging.info(f"Record {ip_attr.get('address')} created")
         return nb_ip
 

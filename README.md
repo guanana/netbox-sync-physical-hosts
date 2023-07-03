@@ -108,8 +108,8 @@ nb_token: your-token-here
 nb_ignore-tls-errors: false
 
 [NMAP]
-get_mac = true
-get_services = false
+get_mac: true
+get_services: false
 networks: your-networks-separated-by-comma-here ie: (192.168.4.0/24,192.168.3.0/24)
 ```
 ```shell
