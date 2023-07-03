@@ -74,6 +74,12 @@ def create_result_dicts(add_dict: str):
                         'state': {'state': 'up', 'reason': 'mock-test', 'reason_ttl': '0'}
                         }
         },
+        'simple_one_host_mac_ff': {
+            '1.1.1.1': {'osmatch': {}, 'ports': [], 'macaddress': 'ff:ff:ff:ff:ff:ff',
+                        'hostname': [{'name': 'localhost', 'type': 'PTR'}],
+                        'state': {'state': 'up', 'reason': 'mock-test', 'reason_ttl': '0'}
+                        }
+        },
         'simple_one_host_service': {
             '127.0.0.1': {'osmatch': {}, 'ports': [],
                           'hostname': [{'name': 'localhost', 'type': 'PTR'}],
@@ -122,6 +128,13 @@ def test_nmap_mac_scan_run_no_mac(monkeypatch, mock_mac_vendor):
     aux_mockportscan(monkeypatch, "simple_one_host_no_mac")
     mock_mac_vendor.return_value = None
     nmap = NmapMacScan("test_no_mac")
+    nmap.run()
+    assert not nmap.scan_results['1.1.1.1'].get("vendor")
+
+def test_nmap_mac_scan_run_mac_ff(monkeypatch, mock_mac_vendor):
+    aux_mockportscan(monkeypatch, "simple_one_host_mac_ff")
+    mock_mac_vendor.return_value = None
+    nmap = NmapMacScan("test_mac_ff")
     nmap.run()
     assert not nmap.scan_results['1.1.1.1'].get("vendor")
 
