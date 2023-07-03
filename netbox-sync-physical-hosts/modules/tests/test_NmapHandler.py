@@ -10,7 +10,9 @@ basic_result = {
     'runtime': {'time': '1609858372', 'timestr': 'Tue Jan  1 14:52:52 1988', 'elapsed': '0.01',
                 'summary': 'Nmap done at Tue Jan  5 14:52:52 2021; 1 IP address (1 host up) scanned in 0.01 seconds',
                 'exit': 'success'
-                }
+                },
+    'task_results': [{'task': 'Ping Scan', 'time': '1688348552', 'extrainfo': '128 total hosts'},
+     {'task': 'System DNS resolution of 128 hosts.', 'time': '1688348553'}]
 }
 service_result = {'127.0.0.1': {'osmatch': {}, 'ports':
     [{'protocol': 'tcp', 'portid': '22', 'state': 'open', 'reason': 'syn-ack', 'reason_ttl': '0',
