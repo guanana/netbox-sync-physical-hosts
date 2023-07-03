@@ -1,4 +1,4 @@
-pynetbox~=5.3.0
+pynetbox~=7.0.1
 requests~=2.31.0
 ConfigArgParse~=1.2.3
 python3-nmap
