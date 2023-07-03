@@ -1,5 +1,5 @@
 pynetbox~=5.3.0
-requests~=2.25.1
+requests~=2.31.0
 ConfigArgParse~=1.2.3
 python3-nmap
 mac-vendor-lookup
