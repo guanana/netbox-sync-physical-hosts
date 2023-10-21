@@ -99,7 +99,7 @@ The script can be run with multiple configuration options.
 Most of the configuration options can be overwrite using environment variables
 ```buildoutcfg
 [GENERAL]
-clenaup: false
+cleanup: false
 tag: nmap-sync
 
 [NETBOX]
@@ -154,7 +154,7 @@ optional arguments:
                         Token for Netbox connection [env var: NETBOX_TOKEN]
   -x, --nb_ignore-tls-errors
                         Ignore TLS conection errors
-  -f, --clenaup         Cleanup orphans
+  -f, --cleanup         Cleanup orphans
   -t TAG, --tag TAG     Tag to use for device identification [env var: TAG]
   -n NETWORKS, --networks NETWORKS
                         Networks/Hosts to scan [env var: NETWORKS]
