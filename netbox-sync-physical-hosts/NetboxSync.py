@@ -6,7 +6,7 @@ from modules.NmapHandler import NmapServiceScan, NmapMacScan, NmapBasic
 
 def main(conf):
     nb = NetBoxHandler(conf.nb_url, conf.nb_token,
-                       conf.nb_ignore_tls_errors, conf.tag, conf.clenaup)
+                       conf.nb_ignore_tls_errors, conf.tag, conf.cleanup)
 
     if conf.get_mac:
         nmap = NmapMacScan(conf.networks)

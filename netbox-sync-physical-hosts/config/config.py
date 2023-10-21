@@ -23,7 +23,7 @@ def parse_config():
     p.add('-x', '--nb_ignore-tls-errors', action='store_true',
           help="Ignore TLS conection errors")
 
-    p.add('-f', '--clenaup', action='store_true', help="Cleanup orphans")
+    p.add('-f', '--cleanup', action='store_true', help="Cleanup orphans")
 
     p.add('-t', '--tag', help="Tag to use for device identification", env_var="TAG")
 
