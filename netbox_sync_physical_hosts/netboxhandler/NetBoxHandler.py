@@ -116,7 +116,7 @@ class NetBoxHandler:
         return nb_attr
 
     def lookup_ip_address(self, ip):
-        nb_ip = [nb_ip for nb_ip in self.all_ips if nb_ip.address.startswith(f"{ip}/")]
+        nb_ip = [nb_ip for nb_ip in self.nb_con.ipam.ip_addresses.filter(address=ip)]
         if not nb_ip:
             return None, True
         if len(nb_ip) == 1:
