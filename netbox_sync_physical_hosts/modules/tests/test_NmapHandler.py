@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock
-from NmapHandler import NmapBasic, NmapMacScan, NmapServiceScan
+from netbox_sync_physical_hosts.modules.NmapHandler import NmapBasic, NmapMacScan, NmapServiceScan
 import pytest
 
 basic_result = {
