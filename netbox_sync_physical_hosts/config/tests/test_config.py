@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 import pytest
 
-from config import parse_config
+from netbox_sync_physical_hosts.config.config import parse_config
 
 def test_get_conf_call(monkeypatch):
     testargs = ["prog", "-u", "http://test", "-p", "1234", "-n", "127.0.0.1"]
