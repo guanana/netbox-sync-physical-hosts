@@ -2,9 +2,7 @@ import logging
 
 import pytest
 from unittest.mock import MagicMock, PropertyMock
-from NetBoxHandler import get_host_by_ip, NetBoxHandler
-
-
+from netbox_sync_physical_hosts.netboxhandler.NetBoxHandler import get_host_by_ip, NetBoxHandler
 # NB Model classes
 
 class Device:
@@ -209,6 +207,6 @@ def test_netboxhandler_duplicated_ip(caplog, mock_pynetbox_con):
     ip2 = Ip("127.0.0.1/32")
     with caplog.at_level(logging.WARNING):
         nb = NetBoxHandler("http://test:8000", "1234", False, "test_tag", False)
-        nb.all_ips = [ip,ip2]
+        nb.all_ips = [ip, ip2]
         nb.run({"127.0.0.1": {}})
         assert [True for record in caplog.records if record.message == 'Found 127.0.0.1 duplicated, skipping']
