@@ -35,11 +35,11 @@ class NetBoxHandler:
         # Netbox objects
         logging.info("Caching all Netbox data")
         try:
-            self.all_ips = self.nb_con.ipam.ip_addresses.all()
-            self.all_interfaces = self.nb_con.dcim.interfaces.all()
-            self.all_devices = self.nb_con.dcim.devices.all()
-            self.all_sites = self.nb_con.dcim.sites.all()
-            self.all_services = self.nb_con.ipam.services.all()
+            self.all_ips = list(self.nb_con.ipam.ip_addresses.all())
+            self.all_interfaces = list(self.nb_con.dcim.interfaces.all())
+            self.all_devices = list(self.nb_con.dcim.devices.all())
+            self.all_sites = list(self.nb_con.dcim.sites.all())
+            self.all_services = list(self.nb_con.ipam.services.all())
         except pynetbox_RequestError:
             logging.critical("Invalid token")
             exit(1)
@@ -116,7 +116,8 @@ class NetBoxHandler:
         return nb_attr
 
     def lookup_ip_address(self, ip):
-        nb_ip = [nb_ip for nb_ip in self.nb_con.ipam.ip_addresses.filter(address=ip)]
+        # nb_ip = [nb_ip for nb_ip in self.nb_con.ipam.ip_addresses.filter(address=ip)]
+        nb_ip = [nb_ip for nb_ip in self.all_ips if nb_ip.address.startswith(f"{ip}/")]
         if not nb_ip:
             return None, True
         if len(nb_ip) == 1:
