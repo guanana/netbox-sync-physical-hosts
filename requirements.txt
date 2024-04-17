@@ -7,3 +7,4 @@ getmac~=0.8.2
 chardet==3.0.4
 Django~=3.2.22
 aiohttp>=3.9.0 # not directly required, pinned by Snyk to avoid a vulnerability
+sqlparse>=0.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
