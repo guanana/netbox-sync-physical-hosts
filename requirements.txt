@@ -1,10 +1,10 @@
 pynetbox~=7.0.1
-requests~=2.31.0
+requests~=2.32.4
 ConfigArgParse~=1.2.3
 python3-nmap
 mac-vendor-lookup
 getmac~=0.8.2
 chardet==3.0.4
-Django~=3.2.22
+Django~=4.2.22
 aiohttp>=3.9.0 # not directly required, pinned by Snyk to avoid a vulnerability
 sqlparse>=0.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
